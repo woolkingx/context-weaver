@@ -1,0 +1,581 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://context-weaver/tools/tools.schema.json",
+  "title": "Context Weaver tools.schema",
+  "description": "The public API schema: target.method(payload). Each properties.<target>.properties.<method> is the Draft-07 value structure of that method's payload.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "help",
+    "sql",
+    "cache",
+    "rule",
+    "skill",
+    "handbook",
+    "codebase"
+  ],
+  "properties": {
+    "help": {
+      "type": "object",
+      "properties": {
+        "render": {
+          "type": "object",
+          "description": "Show command reference.",
+          "help": "Show command reference.",
+          "usage": "ctx help [--full]",
+          "output": "string",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "root": {
+              "type": "string",
+              "description": "Project root; the current directory when omitted."
+            },
+            "full": {
+              "type": "boolean",
+              "description": "Include the SQL examples and payload details.",
+              "flag": "--full"
+            }
+          }
+        }
+      }
+    },
+    "sql": {
+      "type": "object",
+      "properties": {
+        "run": {
+          "type": "object",
+          "description": "Query the project graph.",
+          "help": "Query the project graph.",
+          "usage": "ctx sql \"<SELECT ...>\" [--root <path>] [--owners <list>]",
+          "output": "SqlResult",
+          "additionalProperties": false,
+          "required": [
+            "query"
+          ],
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "A read-only SELECT statement.",
+              "position": 0
+            },
+            "root": {
+              "type": "string",
+              "description": "Project root; the current directory when omitted."
+            },
+            "owners": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Owners to include (rules, skills, handbook, codebase).",
+              "flag": "--owners"
+            }
+          }
+        }
+      }
+    },
+    "cache": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "object",
+          "description": "Read graph freshness.",
+          "help": "Read graph freshness.",
+          "usage": "ctx cache status [owners]",
+          "output": "CacheStatus",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "root": {
+              "type": "string",
+              "description": "Project root; the current directory when omitted."
+            },
+            "owners": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Owners to include (rules, skills, handbook, codebase).",
+              "position": 0
+            }
+          }
+        },
+        "build": {
+          "type": "object",
+          "description": "Build project graph.",
+          "help": "Build project graph.",
+          "usage": "ctx cache build [owners]",
+          "output": "CacheBuild",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "root": {
+              "type": "string",
+              "description": "Project root; the current directory when omitted."
+            },
+            "owners": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Owners to include (rules, skills, handbook, codebase).",
+              "position": 0
+            }
+          }
+        },
+        "clear": {
+          "type": "object",
+          "description": "Clear project graph.",
+          "help": "Clear project graph.",
+          "usage": "ctx cache clear [owners]",
+          "output": "CacheClear",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "root": {
+              "type": "string",
+              "description": "Project root; the current directory when omitted."
+            },
+            "owners": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Owners to include (rules, skills, handbook, codebase).",
+              "position": 0
+            }
+          }
+        }
+      }
+    },
+    "rule": {
+      "type": "object",
+      "properties": {
+        "run": {
+          "type": "object",
+          "description": "Read rule projection.",
+          "help": "Read rule projection.",
+          "usage": "ctx rule [--root <path>]",
+          "output": "RuleResult",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "root": {
+              "type": "string",
+              "description": "Project root; the current directory when omitted."
+            }
+          }
+        }
+      }
+    },
+    "skill": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "object",
+          "description": "Find skills.",
+          "help": "Find skills.",
+          "usage": "ctx skill query [term]",
+          "output": "SkillReport",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "root": {
+              "type": "string",
+              "description": "Project root; the current directory when omitted."
+            },
+            "query": {
+              "type": "string",
+              "description": "Search terms.",
+              "rest": true
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Maximum number of skills returned.",
+              "flag": "--limit",
+              "minimum": 1,
+              "default": 20
+            }
+          }
+        },
+        "load": {
+          "type": "object",
+          "description": "Load a skill.",
+          "help": "Load a skill.",
+          "usage": "ctx skill load <name> [into...]",
+          "output": "SkillReport",
+          "additionalProperties": false,
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "root": {
+              "type": "string",
+              "description": "Project root; the current directory when omitted."
+            },
+            "name": {
+              "type": "string",
+              "description": "Skill name.",
+              "position": 0
+            },
+            "into": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Targets the skill content is loaded into.",
+              "position": 1,
+              "rest": true,
+              "default": []
+            }
+          }
+        },
+        "list": {
+          "type": "object",
+          "description": "List skills.",
+          "help": "List skills.",
+          "usage": "ctx skill list",
+          "output": "SkillReport",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "root": {
+              "type": "string",
+              "description": "Project root; the current directory when omitted."
+            }
+          }
+        }
+      }
+    },
+    "handbook": {
+      "type": "object",
+      "properties": {
+        "read": {
+          "type": "object",
+          "description": "Read handbook (maintenance).",
+          "help": "Read handbook (maintenance).",
+          "usage": "ctx handbook [--chapter <name>|--tags <list>|--ids <list>]",
+          "output": "ModuleStatus",
+          "disabled": true,
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "root": {
+              "type": "string",
+              "description": "Project root; the current directory when omitted."
+            },
+            "chapter": {
+              "type": "string",
+              "description": "Chapter name.",
+              "flag": "--chapter"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Tags to select.",
+              "flag": "--tags"
+            },
+            "ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Ids to select.",
+              "flag": "--ids"
+            }
+          }
+        }
+      }
+    },
+    "codebase": {
+      "type": "object",
+      "properties": {
+        "relate": {
+          "type": "object",
+          "description": "Relate codebase tokens.",
+          "help": "Relate codebase tokens.",
+          "usage": "ctx codebase relate <token> [--top <n>]",
+          "output": "RelateReport",
+          "additionalProperties": false,
+          "required": [
+            "token"
+          ],
+          "properties": {
+            "root": {
+              "type": "string",
+              "description": "Project root; the current directory when omitted."
+            },
+            "token": {
+              "type": "string",
+              "description": "Token to relate.",
+              "position": 0
+            },
+            "top": {
+              "type": "integer",
+              "description": "Number of related tokens returned.",
+              "flag": "--top",
+              "minimum": 1,
+              "default": 10
+            }
+          }
+        },
+        "token": {
+          "type": "object",
+          "description": "CRUD token weights.",
+          "help": "CRUD token weights.",
+          "usage": "ctx codebase token <set|get|row|del> ...",
+          "output": "TokenReport",
+          "additionalProperties": false,
+          "required": [
+            "operation"
+          ],
+          "properties": {
+            "root": {
+              "type": "string",
+              "description": "Project root; the current directory when omitted."
+            },
+            "operation": {
+              "type": "string",
+              "description": "Token weight operation: set, get, row or del.",
+              "position": 0
+            },
+            "args": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Operation arguments.",
+              "position": 1,
+              "rest": true,
+              "default": []
+            },
+            "top": {
+              "type": "integer",
+              "description": "Number of rows returned.",
+              "flag": "--top",
+              "minimum": 1,
+              "default": 8
+            }
+          }
+        },
+        "search": {
+          "type": "object",
+          "description": "Find where a string occurs in source.",
+          "help": "Find where a string occurs in source.",
+          "usage": "ctx codebase search <query> [--limit <n>] [--path <prefix>]",
+          "output": "SearchResult",
+          "additionalProperties": false,
+          "required": [
+            "query"
+          ],
+          "properties": {
+            "root": {
+              "type": "string",
+              "description": "Project root; the current directory when omitted."
+            },
+            "query": {
+              "type": "string",
+              "description": "String to find in source.",
+              "rest": true
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Maximum number of hits.",
+              "flag": "--limit",
+              "minimum": 1,
+              "default": 20
+            },
+            "path": {
+              "type": "string",
+              "description": "Only search paths under this prefix.",
+              "flag": "--path"
+            }
+          }
+        },
+        "slice": {
+          "type": "object",
+          "description": "Read source lines.",
+          "help": "Read source lines.",
+          "usage": "ctx codebase slice <path> [--start <n>] [--end <n>]",
+          "output": "SliceResult",
+          "additionalProperties": false,
+          "required": [
+            "path"
+          ],
+          "properties": {
+            "root": {
+              "type": "string",
+              "description": "Project root; the current directory when omitted."
+            },
+            "path": {
+              "type": "string",
+              "description": "Source file path relative to the root.",
+              "position": 0
+            },
+            "start": {
+              "type": "integer",
+              "description": "First line (1-based).",
+              "flag": "--start",
+              "minimum": 1,
+              "default": 1
+            },
+            "end": {
+              "type": "integer",
+              "description": "Last line (inclusive).",
+              "flag": "--end",
+              "minimum": 1
+            }
+          }
+        },
+        "contain": {
+          "type": "object",
+          "description": "Structure tree of a symbol or file.",
+          "help": "Structure tree of a symbol or file.",
+          "usage": "ctx codebase contain <symbol> [--depth <n>]",
+          "output": "GraphFlow",
+          "additionalProperties": false,
+          "required": [
+            "symbol"
+          ],
+          "properties": {
+            "root": {
+              "type": "string",
+              "description": "Project root; the current directory when omitted."
+            },
+            "symbol": {
+              "type": "string",
+              "description": "Symbol or file path.",
+              "position": 0
+            },
+            "depth": {
+              "type": "integer",
+              "description": "Nesting depth.",
+              "flag": "--depth",
+              "minimum": 1,
+              "default": 2
+            }
+          }
+        },
+        "call": {
+          "type": "object",
+          "description": "Call chain from/to a symbol.",
+          "help": "Call chain from/to a symbol.",
+          "usage": "ctx codebase call <symbol> [--direction <in|out|both>]",
+          "output": "GraphFlow",
+          "additionalProperties": false,
+          "required": [
+            "symbol"
+          ],
+          "properties": {
+            "root": {
+              "type": "string",
+              "description": "Project root; the current directory when omitted."
+            },
+            "symbol": {
+              "type": "string",
+              "description": "Symbol or file path.",
+              "position": 0
+            },
+            "direction": {
+              "type": "string",
+              "description": "Flow direction: in, out or both.",
+              "flag": "--direction",
+              "enum": [
+                "in",
+                "out",
+                "both"
+              ],
+              "default": "both"
+            }
+          }
+        },
+        "dep": {
+          "type": "object",
+          "description": "Dependency flow of a file or module.",
+          "help": "Dependency flow of a file or module.",
+          "usage": "ctx codebase dep <symbol> [--direction <in|out|both>]",
+          "output": "GraphFlow",
+          "additionalProperties": false,
+          "required": [
+            "symbol"
+          ],
+          "properties": {
+            "root": {
+              "type": "string",
+              "description": "Project root; the current directory when omitted."
+            },
+            "symbol": {
+              "type": "string",
+              "description": "Symbol or file path.",
+              "position": 0
+            },
+            "direction": {
+              "type": "string",
+              "description": "Flow direction: in, out or both.",
+              "flag": "--direction",
+              "enum": [
+                "in",
+                "out",
+                "both"
+              ],
+              "default": "both"
+            }
+          }
+        },
+        "data": {
+          "type": "object",
+          "description": "Data flow through a symbol.",
+          "help": "Data flow through a symbol.",
+          "usage": "ctx codebase data <symbol>",
+          "output": "GraphFlow",
+          "additionalProperties": false,
+          "required": [
+            "symbol"
+          ],
+          "properties": {
+            "root": {
+              "type": "string",
+              "description": "Project root; the current directory when omitted."
+            },
+            "symbol": {
+              "type": "string",
+              "description": "Symbol or file path.",
+              "position": 0
+            }
+          }
+        },
+        "seq": {
+          "type": "object",
+          "description": "Sequence flow between two points.",
+          "help": "Sequence flow between two points.",
+          "usage": "ctx codebase seq <from> <to>",
+          "output": "GraphFlow",
+          "additionalProperties": false,
+          "required": [
+            "from",
+            "to"
+          ],
+          "properties": {
+            "root": {
+              "type": "string",
+              "description": "Project root; the current directory when omitted."
+            },
+            "from": {
+              "type": "string",
+              "description": "Start point.",
+              "position": 0
+            },
+            "to": {
+              "type": "string",
+              "description": "End point.",
+              "position": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

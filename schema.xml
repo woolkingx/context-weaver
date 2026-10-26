@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema id="context-weaver-schema-dd" version="1.1" format="schema-dd">
+  <purpose>
+    FileBlock is the only semantic truth.
+    JSON value structure is the contract; API, SQL, tools are projections.
+    The runtime construction rule is fixed Object values as const objects,
+    stateful semantic Classes as MJS class Instances, and stateless named APIs
+    as static-only classes when a class-shaped API is required.
+    Coding and invocation conventions are detailed by the Handbook coding-style block.
+  </purpose>
+
+  <definitions>
+    <object name="FileBlock">
+      <field name="owner" required="true" role="semantic-owner" />
+      <field name="root" required="true" role="normalized-root" />
+      <field name="path" required="true" role="admitted-relative-path" />
+      <field name="value" required="true" role="complete-owner-value" />
+      <field name="contentHash" required="true" role="sha256-revision" />
+      <field name="producerVersion" required="true" role="producer-identity" />
+      <x-boundary>FileBlock is the only semantic truth; SQL/API are projections.</x-boundary>
+    </object>
+  </definitions>
+
+
+
+  <relations>
+    <relation kind="contains" from="FileBlock" to="value" cardinality="one" />
+  </relations>
+
+  <invariants>
+    <invariant id="one-data-owner">Each semantic value has one and only one data owner.</invariant>
+    <invariant id="projection-not-truth">SQL/API are projections; FileBlock is the only truth.</invariant>
+    <invariant id="class-instance-object-static">Fixed semantic Objects use const object values; stateful semantic Classes use MJS class Instances created with new; stateless named APIs use static-only classes.</invariant>
+    <invariant id="mjs-airbnb-baseline">Every MJS project uses Airbnb JavaScript Style Guide through eslint-config-airbnb-extended and ESLint.</invariant>
+    <invariant id="no-owner-inheritance">Semantic owners collaborate through composition and explicit delegation, not inheritance.</invariant>
+  </invariants>
+
+  <x-docs handbook="README.md" unitBlocks="🧩_Blocks/*.xml" />
+</schema>

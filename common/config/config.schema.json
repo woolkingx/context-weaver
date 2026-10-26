@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://context-weaver/config/config.schema.json",
+  "title": "Context Weaver Config Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "modules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rule": { "type": "boolean", "default": true },
+        "skill": { "type": "boolean", "default": true },
+        "handbook": { "type": "boolean", "default": true },
+        "codebase": { "type": "boolean", "default": true }
+      },
+      "default": { "rule": true, "skill": true, "handbook": true, "codebase": true }
+    },
+    "globalSkillRoots": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["absolutePath"], "properties": { "absolutePath": { "type": "string", "pattern": "^/" }, "pathPrefix": { "type": "string" }, "scope": { "type": "string", "enum": ["global"] } } }, "default": [] },
+    "maxSkillScanDepth": { "type": "integer", "minimum": 1, "default": 6 },
+    "budget": { "type": "object", "additionalProperties": false, "properties": { "maxHits": { "type": "integer", "minimum": 1, "default": 20 }, "maxChars": { "type": "integer", "minimum": 1, "default": 12000 }, "contextWindow": { "type": "integer", "minimum": 1, "default": 128000 } }, "default": { "maxHits": 20, "maxChars": 12000, "contextWindow": 128000 } },
+    "contextTiers": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["tier"], "properties": { "tier": { "type": "string", "enum": ["small", "medium", "large", "massive"] }, "maxWindow": { "type": ["integer", "null"], "minimum": 1 } } }, "default": [{ "tier": "small", "maxWindow": 50000 }, { "tier": "medium", "maxWindow": 150000 }, { "tier": "large", "maxWindow": 500000 }, { "tier": "massive", "maxWindow": null }] },
+    "paths": { "type": "object", "additionalProperties": false, "properties": { "stateDir": { "type": ["string", "null"], "pattern": "^/" }, "cacheDir": { "type": ["string", "null"], "pattern": "^/" }, "dataDir": { "type": ["string", "null"], "pattern": "^/" } }, "default": { "stateDir": null, "cacheDir": null, "dataDir": null } }
+  }
+}

@@ -1,0 +1,10 @@
+node_modules/
+.trash/
+.cleanup/
+.backup/
+coverage/
+*.log
+logs/
+status/
+__pycache__/
+*.pyc

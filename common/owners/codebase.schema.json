@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://context-weaver/owners/codebase.schema.json",
+  "title": "Codebase owner FileBlock value",
+  "$ref": "#/definitions/Value",
+  "definitions": {
+    "AstValue": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "format": { "type": "string", "minLength": 1 },
+        "language": { "type": "string", "minLength": 1 },
+        "parser_version": { "type": "string", "minLength": 1 },
+        "root": { "type": "object" }
+      },
+      "required": ["format", "language", "parser_version", "root"],
+      "description": "Codebase-owned official frontend data value. Frontend-specific fields remain in this value rather than becoming an API payload."
+    },
+    "CodebaseFileValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ast": { "$ref": "#/definitions/AstValue" },
+        "facts": { "type": "object" }
+      },
+      "required": ["ast"]
+    },
+    "Value": {
+      "allOf": [{ "$ref": "#/definitions/CodebaseFileValue" }],
+      "x-owner": "codebase",
+      "x-boundary": "Admits executable source through FileOwner and owns the complete official frontend data value.",
+      "x-invariants": ["A Codebase FileBlock owns one CodebaseFileValue with an official frontend AST.", "AST is not reduced to a second normalized storage truth."]
+    }
+  }
+}

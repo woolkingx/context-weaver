@@ -1,0 +1,228 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://context-weaver/db/file-block.schema.json",
+  "title": "Context Weaver FileBlock and cache lifecycle contract",
+  "description": "The only persisted semantic base is one complete owner FileBlock value per admitted source file. Tools-call payloads are separate API inputs; cache objects retain revisions and lifecycle metadata only.",
+  "$ref": "#/definitions/FileBlock",
+  "definitions": {
+    "OwnerId": {
+      "type": "string",
+      "enum": ["rules", "skills", "handbook", "codebase"]
+    },
+    "RootKey": {
+      "type": "string",
+      "minLength": 1
+    },
+    "RelativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$)).+"
+    },
+    "Coordinates": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "start": { "$ref": "#/definitions/Position" },
+        "end": { "$ref": "#/definitions/Position" }
+      },
+      "required": ["start", "end"]
+    },
+    "Position": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "line": { "type": "integer", "minimum": 1 },
+        "column": { "type": "integer", "minimum": 1 },
+        "offset": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["line", "column", "offset"]
+    },
+    "SourceIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "uri": { "type": "string", "minLength": 1 },
+        "coordinates": { "$ref": "#/definitions/Coordinates" },
+        "format": { "type": "string", "minLength": 1 },
+        "metadata": { "type": "object" }
+      },
+      "required": ["uri", "coordinates", "format", "metadata"]
+    },
+    "Capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "state": { "enum": ["complete", "partial", "unavailable"] },
+        "features": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      },
+      "required": ["state", "features"]
+    },
+    "Revision": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sha256": {
+          "type": "string",
+          "pattern": "^[A-Fa-f0-9]{64}$"
+        },
+        "producerVersion": { "type": "string", "minLength": 1 },
+        "capability": { "$ref": "#/definitions/Capability" },
+        "observed": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mtimeMs": { "type": "number", "minimum": 0 },
+            "size": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["mtimeMs", "size"]
+        }
+      },
+      "required": ["sha256", "producerVersion", "capability", "observed"]
+    },
+    "AdmittedFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "root_id": { "$ref": "#/definitions/RootKey" },
+        "path": { "type": "string", "minLength": 1 },
+        "mtimeMs": { "type": ["number", "null"], "minimum": 0 },
+        "size": { "type": ["integer", "null"], "minimum": 0 },
+        "sha256": { "type": "string", "pattern": "^[A-Fa-f0-9]{64}$" }
+      },
+      "required": ["root_id", "path", "mtimeMs", "size", "sha256"]
+    },
+    "OwnerInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "producerGeneration": { "type": "string", "minLength": 1 },
+        "files": { "type": "array", "items": { "$ref": "#/definitions/AdmittedFile" } },
+        "policyInputs": { "type": "object" },
+        "extraInputs": { "type": "array" },
+        "admittedFileCount": { "type": "integer", "minimum": 0 },
+        "fingerprint": { "type": "string", "pattern": "^[A-Fa-f0-9]{64}$" },
+        "policyFingerprint": { "type": "string", "pattern": "^[A-Fa-f0-9]{64}$" }
+      },
+      "required": ["producerGeneration", "files", "policyInputs", "extraInputs", "admittedFileCount", "fingerprint", "policyFingerprint"],
+      "x-owner": "FileOwner + content owner admission boundary"
+    },
+    "StorageFileBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "owner": { "$ref": "#/definitions/OwnerId" },
+        "cache_key": { "type": "string", "minLength": 1 },
+        "root_id": { "$ref": "#/definitions/RootKey" },
+        "file_path": { "$ref": "#/definitions/RelativePath" },
+        "fingerprint": { "type": "string", "minLength": 1 },
+        "mtime_ms": { "type": ["number", "null"], "minimum": 0 },
+        "size": { "type": ["integer", "null"], "minimum": 0 },
+        "content_hash": { "type": ["string", "null"], "pattern": "^[A-Fa-f0-9]{64}$" },
+        "producer_generation": { "type": "string", "minLength": 1 },
+        "schema_version": { "type": "string", "minLength": 1 },
+        "value": { "type": "object" }
+      },
+      "required": ["owner", "cache_key", "root_id", "file_path", "fingerprint", "mtime_ms", "size", "content_hash", "producer_generation", "schema_version", "value"],
+      "x-boundary": "Physical cache row for a complete owner value. The column is named value so API payload remains reserved for call input."
+    },
+    "FileBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "owner": { "$ref": "#/definitions/OwnerId" },
+        "root": { "$ref": "#/definitions/RootKey" },
+        "path": { "$ref": "#/definitions/RelativePath" },
+        "source": { "$ref": "#/definitions/SourceIdentity" },
+        "revision": { "$ref": "#/definitions/Revision" },
+        "value": { "type": "object" }
+      },
+      "required": ["owner", "root", "path", "source", "revision", "value"],
+      "oneOf": [
+        {
+          "properties": {
+            "owner": { "const": "rules" },
+            "value": { "$ref": "../owners/rule.schema.json#/definitions/Value" }
+          }
+        },
+        {
+          "properties": {
+            "owner": { "const": "skills" },
+            "value": { "$ref": "../owners/skill.schema.json#/definitions/Value" }
+          }
+        },
+        {
+          "properties": {
+            "owner": { "const": "handbook" },
+            "value": { "$ref": "../owners/handbook.schema.json#/definitions/Value" }
+          }
+        },
+        {
+          "properties": {
+            "owner": { "const": "codebase" },
+            "value": { "$ref": "../owners/codebase.schema.json#/definitions/Value" }
+          }
+        }
+      ],
+      "x-docs": {
+        "intent": "One admitted source file, one owner, one content-addressed revision, one complete JSON-safe owner value.",
+        "boundary": "FileOwner admits files; the paired File producer creates value; the paired Cache stores revisions; Tools API is the integration point."
+      },
+      "x-invariants": [
+        "Owner is one of rules, skills, handbook, codebase; display names remain Rule, Skill, Handbook, Codebase.",
+        "SHA-256 is the revision and freshness authority; mtimeMs and size are hints only.",
+        "The value is the complete owner-defined data value; ObjectTree does not prescribe its field names.",
+        "A normalized node/edge store cannot become a second semantic storage truth."
+      ]
+    },
+    "FileRevisionRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": { "$ref": "#/definitions/RelativePath" },
+        "sha256": { "type": "string", "pattern": "^[A-Fa-f0-9]{64}$" },
+        "producerVersion": { "type": "string", "minLength": 1 }
+      },
+      "required": ["path", "sha256", "producerVersion"]
+    },
+    "CacheManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "owner": { "$ref": "#/definitions/OwnerId" },
+        "root": { "$ref": "#/definitions/RootKey" },
+        "cacheKey": { "type": "string", "minLength": 1 },
+        "inputDigest": { "type": "string", "minLength": 1 },
+        "producerVersion": { "type": "string", "minLength": 1 },
+        "policyDigest": { "type": "string", "minLength": 1 },
+        "admittedFileCount": { "type": "integer", "minimum": 0 },
+        "expectedFileBlockCount": { "type": "integer", "minimum": 0 },
+        "revisionSet": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/FileRevisionRef" }
+        }
+      },
+      "required": ["owner", "root", "cacheKey", "inputDigest", "producerVersion", "policyDigest", "admittedFileCount", "expectedFileBlockCount", "revisionSet"],
+      "x-invariants": ["Manifest membership must exactly match admitted FileBlock revisions.", "Manifest is lifecycle metadata, not semantic content."]
+    },
+    "CacheRelease": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "owner": { "$ref": "#/definitions/OwnerId" },
+        "root": { "$ref": "#/definitions/RootKey" },
+        "cacheKey": { "type": "string", "minLength": 1 },
+        "releaseId": { "type": "string", "minLength": 1 },
+        "revisionSet": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/FileRevisionRef" }
+        }
+      },
+      "required": ["owner", "root", "cacheKey", "releaseId", "revisionSet"],
+      "x-invariants": ["A release is an immutable set of FileBlock revisions.", "Release metadata cannot become a second semantic source."]
+    }
+  }
+}

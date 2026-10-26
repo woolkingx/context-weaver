@@ -1,0 +1,40 @@
+{
+  "name": "context-weaver",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "ctx": "./codebase/cli/context-weaver.mjs"
+  },
+  "scripts": {
+    "test": "npm run test:contract",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test:dev": "npm run test:contract",
+    "test:contract": "node scripts/test-runner.mjs test/public-target-*.test.mjs",
+    "test:owner-boundary": "npm run test:contract",
+    "test:cli-schema": "npm run test:contract",
+    "benchmark:context": "node scripts/run-context-benchmark.mjs",
+    "experiment:graph-ranking": "node scripts/run-graph-ranking-experiment.mjs",
+    "gate:fileblock-ground-model": "node scripts/check-fileblock-ground-model-boundary.mjs",
+    "gate:cross-repo-boundary": "node scripts/check-cross-repo-boundary.mjs --repo .",
+    "gate:architecture": "node scripts/check-architecture-contract.mjs",
+    "gate:config": "node scripts/check-config-contract.mjs",
+    "gate:config-schema-runtime": "node scripts/check-config-schema-runtime.mjs",
+    "gate:skill-source-config": "node scripts/check-skill-source-config-gate.mjs",
+    "smoke": "node codebase/cli/context-weaver.mjs --help"
+  },
+  "engines": {
+    "node": ">=24.13.0"
+  },
+  "dependencies": {
+    "json2md": "2.0.3",
+    "typescript": "^6.0.3"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.5",
+    "eslint-config-airbnb-extended": "^3.2.0",
+    "jsdom": "^26.1.0",
+    "mermaid": "^11.12.1"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://context-weaver/owners/rule.schema.json",
+  "title": "Rule owner FileBlock value",
+  "$ref": "#/definitions/Value",
+  "definitions": {
+    "SectionValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "heading": { "type": "string", "minLength": 1 },
+        "content": { "type": "string" }
+      },
+      "required": ["heading", "content"]
+    },
+    "RuleDocumentValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "content": { "type": "string" },
+        "sections": { "type": "object", "additionalProperties": { "$ref": "#/definitions/SectionValue" } }
+      },
+      "required": ["path", "content", "sections"]
+    },
+    "Value": {
+      "allOf": [{ "$ref": "#/definitions/RuleDocumentValue" }],
+      "x-owner": "rules",
+      "x-boundary": "Admits rule source through FileOwner and owns the Rule data value.",
+      "x-invariants": ["A Rule FileBlock owns one rule document value."]
+    }
+  }
+}

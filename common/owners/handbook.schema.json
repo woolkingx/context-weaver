@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://context-weaver/owners/handbook.schema.json",
+  "title": "Handbook owner FileBlock value",
+  "$ref": "#/definitions/Value",
+  "definitions": {
+    "ChapterRefValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sourceFingerprint": { "type": "string", "minLength": 1 }
+      },
+      "required": ["path", "sourceFingerprint"]
+    },
+    "HandbookIndexValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "handbook_index" },
+        "content": { "type": "string" },
+        "chapters": { "type": "object", "additionalProperties": { "$ref": "#/definitions/ChapterRefValue" } }
+      },
+      "required": ["kind", "content", "chapters"]
+    },
+    "RelationValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "type": "string", "minLength": 1 },
+        "target": { "type": "string", "minLength": 1 }
+      },
+      "required": ["kind", "target"]
+    },
+    "HandbookBlockValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "handbook_block" },
+        "id": { "type": "string", "minLength": 1 },
+        "chapter": { "type": ["string", "null"] },
+        "tags": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+        "content": { "type": "string" },
+        "contentRef": { "type": "string", "minLength": 1 },
+        "relations": { "type": "array", "items": { "$ref": "#/definitions/RelationValue" } }
+      },
+      "required": ["kind", "id", "chapter", "tags", "content", "relations"]
+    },
+    "Value": {
+      "allOf": [{ "oneOf": [{ "$ref": "#/definitions/HandbookIndexValue" }, { "$ref": "#/definitions/HandbookBlockValue" }] }],
+      "x-owner": "handbook",
+      "x-boundary": "Admits handbook source through FileOwner and owns the Handbook data value and declared content references.",
+      "x-invariants": ["A Handbook FileBlock owns either the index value or one unit-block value."]
+    }
+  }
+}

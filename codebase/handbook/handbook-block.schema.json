@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://context-weaver.local/handbook/handbook-block.schema.json",
+  "title": "Admitted Handbook semantic block",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "tags", "chapter", "content", "sourcePath", "fingerprint", "relations"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "tags": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "chapter": { "type": ["string", "null"] },
+    "content": { "type": "string" },
+    "sourcePath": { "type": "string", "minLength": 1 },
+    "fingerprint": { "type": "string", "minLength": 1 },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "target"],
+        "properties": {
+          "type": { "type": "string", "minLength": 1 },
+          "target": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}
